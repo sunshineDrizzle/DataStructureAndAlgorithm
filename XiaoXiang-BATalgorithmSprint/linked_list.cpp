@@ -29,6 +29,7 @@ class Solution{
 public:
 	ListNode* reverseList(ListNode *head);
 	ListNode* reverseList(ListNode *head, int m, int n);
+	ListNode* mergeSortedList(ListNode *head1, ListNode *head2);
 };
 
 
@@ -36,10 +37,14 @@ int main(){
 	Solution solve;
 	void reverse_example1(Solution *solve);
 	void reverse_example2(Solution *solve);
+	void merge_example(Solution *solve);
 
 	// reverse linked list
 	reverse_example1(&solve);
 	reverse_example2(&solve);
+
+	// merge sorted linked_list
+	merge_example(&solve);
 
 	system("PAUSE");
 	return 0;
@@ -78,6 +83,30 @@ void reverse_example2(Solution *solve) {
 	print_list(head);
 	ListNode *new_head = solve->reverseList(head, 1, 4);
 	cout << "after reverse between [1, 4]:";
+	print_list(new_head);
+}
+
+
+void merge_example(Solution *solve) {
+	ListNode a(1);
+	ListNode b(3);
+	ListNode c(5);
+	ListNode d(2);
+	ListNode e(4);
+	ListNode f(6);
+	ListNode *head1 = &a;
+	a.next = &b;
+	b.next = &c;
+	ListNode *head2 = &d;
+	d.next = &e;
+	e.next = &f;
+
+	cout << "before merge (head1):";
+	print_list(head1);
+	cout << "before merge (head2):";
+	print_list(head2);
+	ListNode *new_head = solve->mergeSortedList(head1, head2);
+	cout << "after merge:";
 	print_list(new_head);
 }
 
@@ -121,4 +150,28 @@ ListNode* Solution::reverseList(ListNode *head, int m, int n) {
 		new_head = reversed_head;
 	}
 	return new_head;
+}
+
+ListNode* Solution::mergeSortedList(ListNode *head1, ListNode *head2) {
+	ListNode temp_node(0);
+	ListNode *pre = &temp_node;
+	while (head1 && head2) {
+		if (head1->val < head2->val) {
+			pre->next = head1;
+			head1 = head1->next;
+		}
+		else {
+			pre->next = head2;
+			head2 = head2->next;
+		}
+		pre = pre->next;
+	}
+
+	if (head1) {
+		pre->next = head1;
+	}
+	else {
+		pre->next = head2;
+	}
+	return temp_node.next;
 }
