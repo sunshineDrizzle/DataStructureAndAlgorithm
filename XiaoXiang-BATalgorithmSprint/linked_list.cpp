@@ -1,6 +1,9 @@
 
 #include<iostream>
 #include<stdlib.h>
+#include<set>
+#include<map>
+#include<vector>
 using namespace std;
 
 
@@ -8,6 +11,12 @@ struct ListNode{
 	int val;
 	ListNode *next;
 	ListNode(int x) : val(x), next(NULL){}
+};
+
+struct RandomListNode {
+	int val;
+	RandomListNode *next, *random;
+	RandomListNode(int x): val(x), next(NULL), random(NULL){}
 };
 
 
@@ -22,6 +31,19 @@ void print_list(ListNode *head){
 		head = head->next;
 	}
 	printf("\n");
+}
+
+void print_random_list(RandomListNode *head) {
+	while (head) {
+		printf("val: %d; ", head->val);
+		if (head->random) {
+			printf("random: %d\n", head->random->val);
+		}
+		else {
+			printf("random: NULL\n");
+		}
+		head = head->next;
+	}
 }
 
 
@@ -50,6 +72,9 @@ public:
 	ListNode* reverseList(ListNode *head, int m, int n);
 	ListNode* mergeSortedList(ListNode *head1, ListNode *head2);
 	ListNode* getIntersectionNode(ListNode *head1, ListNode *head2);
+	ListNode* detectCircleNode(ListNode *head);
+	ListNode* partition(ListNode *head, int x);
+	RandomListNode* copyRandomList(RandomListNode *head);
 };
 
 
@@ -59,19 +84,34 @@ int main(){
 	void reverse_example2(Solution *solve);
 	void merge_example(Solution *solve);
 	void intersectionNode_example(Solution *solve);
+	void detectCircleNode_example(Solution *solve);
+	void partition_example(Solution *solve);
+	void copyRandomList_example(Solution *solve);
 
 	// reverse linked list
-	cout << "reverse linked list\n";
+	cout << "***reverse linked list***\n";
 	reverse_example1(&solve);
 	reverse_example2(&solve);
 
 	// merge sorted linked_list
-	cout << "merge sorted linked_list";
+	cout << "\n***merge sorted linked_list***\n";
 	merge_example(&solve);
 
 	// get intersection node
-	cout << "get intersection node";
+	cout << "\n***get intersection node***\n";
 	intersectionNode_example(&solve);
+
+	// detect circle node
+	cout << "\n***detect circle node***\n";
+	detectCircleNode_example(&solve);
+
+	// partition linked list
+	cout << "\n***partition linked list***\n";
+	partition_example(&solve);
+
+	// copy random linked list
+	cout << "\n***copy random linked list***\n";
+	copyRandomList_example(&solve);
 
 	system("PAUSE");
 	return 0;
@@ -162,6 +202,67 @@ void intersectionNode_example(Solution *solve) {
 	cout << "The intersection node value is " << intersection_node_ptr->val << endl;
 }
 
+void detectCircleNode_example(Solution *solve) {
+	ListNode a(1);
+	ListNode b(2);
+	ListNode c(3);
+	ListNode d(4);
+	ListNode e(5);
+	ListNode *head = &a;
+	a.next = &b;
+	b.next = &c;
+	c.next = &d;
+	d.next = &e;
+	e.next = &c;
+
+	ListNode *circle_node_ptr = solve->detectCircleNode(head);
+	cout << "The circle node's value is:" << circle_node_ptr->val << endl;
+}
+
+void partition_example(Solution *solve) {
+	ListNode a(1);
+	ListNode b(5);
+	ListNode c(4);
+	ListNode d(3);
+	ListNode e(6);
+	ListNode f(2);
+	ListNode *head = &a;
+	a.next = &b;
+	b.next = &c;
+	c.next = &d;
+	d.next = &e;
+	e.next = &f;
+
+	cout << "before partition:";
+	print_list(head);
+	ListNode *new_head = solve->partition(head, 3);
+	cout << "after partition:";
+	print_list(new_head);
+}
+
+void copyRandomList_example(Solution *solve) {
+	RandomListNode a(1);
+	RandomListNode b(2);
+	RandomListNode c(3);
+	RandomListNode d(4);
+	RandomListNode e(5);
+	RandomListNode *head = &a;
+	a.next = &b;
+	b.next = &c;
+	c.next = &d;
+	d.next = &e;
+	a.random = &e;
+	c.random = &b;
+	e.random = &c;
+
+	cout << "head (" << head << "):\n";
+	print_random_list(head);
+	RandomListNode *new_head = solve->copyRandomList(head);
+	cout << "new head (" << new_head << "):\n";
+	print_random_list(new_head);
+}
+
+
 ListNode* Solution::reverseList(ListNode *head) {
 	ListNode *next = NULL;
 	ListNode *new_head = NULL;
@@ -247,4 +348,58 @@ ListNode* Solution::getIntersectionNode(ListNode *head1, ListNode *head2) {
 		head2 = head2->next;
 	}
 	return NULL;
+}
+
+ListNode* Solution::detectCircleNode(ListNode *head) {
+	set<ListNode *> node_set;
+	while (head) {
+		if (node_set.find(head) != node_set.end()) {
+			return head;
+		}
+		node_set.insert(head);
+		head = head->next;
+	}
+	return NULL;
+}
+
+ListNode* Solution::partition(ListNode *head, int x) {
+	ListNode less_head(0);
+	ListNode *less_ptr = &less_head;
+	ListNode more_head(0);
+	ListNode *more_ptr = &more_head;
+	while (head) {
+		if (head->val < x) {
+			less_ptr->next = head;
+			less_ptr = less_ptr->next;
+		}
+		else {
+			more_ptr->next = head;
+			more_ptr = more_ptr->next;
+		}
+		head = head->next;
+	}
+	less_ptr->next = more_head.next;
+	more_ptr->next = NULL;
+	return less_head.next;
+}
+
+RandomListNode* Solution::copyRandomList(RandomListNode *head) {
+	RandomListNode *node_ptr = head;
+	map<RandomListNode *, int> node2id_map;
+	vector<RandomListNode *> id2node_vec;
+	for (int i = 0; node_ptr; ++i, node_ptr = node_ptr->next) {
+		node2id_map[node_ptr] = i;
+		id2node_vec.push_back(new RandomListNode(node_ptr->val));
+	}
+
+	node_ptr = head;
+	id2node_vec.push_back(NULL);
+	for (int i = 0; node_ptr; ++i, node_ptr = node_ptr->next) {
+		id2node_vec[i]->next = id2node_vec[i + 1];
+		if (node_ptr->random) {
+			int random_id = node2id_map[node_ptr->random];
+			id2node_vec[i]->random = id2node_vec[random_id];
+		}
+	}
+	return id2node_vec[0];
 }
